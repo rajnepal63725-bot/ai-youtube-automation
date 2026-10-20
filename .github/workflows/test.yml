@@ -1,0 +1,34 @@
+
+name: Test Cloud Video Workflow
+
+on:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  create-test-video:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Install FFmpeg
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y ffmpeg fonts-dejavu-core
+
+      - name: Create a sample video
+        run: |
+          ffmpeg -y \
+            -f lavfi \
+            -i "color=c=black:s=1080x1920:r=30:d=5" \
+            -vf "drawtext=fontfile=/usr/share/fonts/truetype/dejavu/DejaVuSans-Bold.ttf:text='Cloud workflow works':fontcolor=white:fontsize=54:x=(w-text_w)/2:y=(h-text_h)/2" \
+            -c:v libx264 \
+            -pix_fmt yuv420p \
+            test-video.mp4
+
+      - name: Save video
+        uses: actions/upload-artifact@v4
+        with:
+          name: test-video
+          path: test-video.mp4
+          retention-days: 3
